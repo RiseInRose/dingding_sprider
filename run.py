@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
-# author:jingjian@datagrand.com
+# author:uncleyiba@qq.com
 # datetime:2020/1/10 下午5:15
 import os, sys, re, json, traceback, time
 from selenium import webdriver
+from flask import Flask, make_response, send_file
+from flask_restful import Resource, Api
+from sprider import SpriderThread
 """
 网页版钉钉入口
 https://im.dingtalk.com/
@@ -17,13 +20,43 @@ https://im.dingtalk.com/
 
 
 """
+app = Flask(__name__, template_folder="template/")
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+api = Api(app)
+@api.representation("text/html")
+def out_html(data,code, headers=None):
+    resp = make_response(data, code)
+    resp.headers.extend(headers or {})
+    return resp
 
 
+# 首页
+@app.route('/', methods=['GET'])
+def index():
+    return "欢迎访问"
 
+@app.route('/file/<path:path>', methods=['GET'])
+def md_file(path):
+    print(path)
+    return send_file('files\\{0}'.format(path))
 
-
+@app.route('/static2', methods=['GET'])
+def md_file2():
+    # print(path)
+    # return send_file('files/{0}'.format(path))
+    return ""
 
 
 
 if __name__ == "__main__":
-    pass
+    sh = SpriderThread("dahua")
+    sh.start()
+
+
+    app.config['JSON_AS_ASCII'] = False
+    app.run(port=9999, host="0.0.0.0")
+
+
