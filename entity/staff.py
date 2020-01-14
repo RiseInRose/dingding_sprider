@@ -9,7 +9,8 @@ class Staff(object):
     def __init__(self, name):
         self.name = name
         # self.phone = phone
-        # self.depa = depa
+        self.dept = None
+        self.dept_list = []
 
 
 
