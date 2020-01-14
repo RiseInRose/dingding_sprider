@@ -13,6 +13,9 @@ RUN_HOUR_NUM = 1
 # 运行完一次组织架构爬取之后默认 N 秒之后才可能重新运行
 RUN_AGAIN_MIN_TIME = 23 * 60 * 60
 
+# 公司单部门最大人数
+NUM_OF_STAFF_ONE_DEPT = 50
+
 
 
 

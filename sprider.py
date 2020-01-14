@@ -4,7 +4,7 @@
 # datetime:2020/1/10 下午5:16
 import os, sys, re, json, traceback, time, datetime, threading, copy
 from selenium import webdriver
-from conf.conf import DINGDING_URL, RUN_HOUR_NUM
+from conf.conf import DINGDING_URL, RUN_HOUR_NUM, RUN_AGAIN_MIN_TIME, NUM_OF_STAFF_ONE_DEPT
 from entity.department import Department
 from entity.staff import Staff
 
@@ -53,7 +53,7 @@ class Sprider(object):
             print("当前小时数:{0}".format(hour))
             if hour % RUN_HOUR_NUM == 0:
                 data = self.get_data()
-                time.sleep(2 * 60 * 60)
+                time.sleep(RUN_AGAIN_MIN_TIME)
             else:
                 time.sleep(5 * 60)
 
@@ -69,12 +69,23 @@ class Sprider(object):
         """
         time.sleep(2)
         print("{0}{1}{2}".format("  " * len(index_list), father_dept.name, ":"))
-        # 进入对应的部门
+        # 进入对应的部门cd /
         driver.find_element_by_class_name("dept-name").click()
         time.sleep(1)
         for each_index in index_list:
             team_items = driver.find_elements_by_class_name("team-item")
             team_items[each_index].click()
+            time.sleep(1)
+
+        # 滚轮下滑   默认一屏是刷新20个人    实际要根据公司体量进行调整
+        # document.getElementsByClassName("org-member-inner")[0].scrollTop += 1000
+        n = NUM_OF_STAFF_ONE_DEPT // 20 + 2
+        team_items = driver.find_elements_by_class_name("team-item")
+        member_items = driver.find_elements_by_class_name("member-item")
+        if len(team_items) > 0 or (len(team_items) == 0 and len(member_items) < 15):
+            n = 0
+        for i in range(n):
+            driver.execute_script('document.getElementsByClassName("org-member-inner")[0].scrollTop += 1000')
             time.sleep(1)
 
 
@@ -86,6 +97,7 @@ class Sprider(object):
                 for each_member in member_items:
                     member_name = each_member.find_element_by_class_name("avatar").find_element_by_tag_name("div").get_attribute("name")
                     member_name_list.append(member_name)
+                father_dept.member_list = member_name_list
                 print("{0}{1}".format("  " * (len(index_list) + 1), ",".join(member_name_list)))
             else:
                 pass
@@ -105,9 +117,9 @@ class Sprider(object):
 
     def get_data(self):
         self.driver.get(DINGDING_URL)
-        # 处于未登陆状态则每隔1min刷新一下登陆码
+        # 处于未登陆状态则每隔2min刷新一下登陆码
         while not self.login():
-            time.sleep(2 * 15)
+            time.sleep(2 * 60)
         # 登陆成功
         self.driver.save_screenshot("files/page.png")
         # 去掉最开始的框
@@ -123,14 +135,8 @@ class Sprider(object):
         # self.driver.find_element_by_class_name("dept-name").click()
         dept_company = Department(self.name)
         self.find_children(self.driver, [], dept_company)
-
-
-
-
-
-
-
-
+        dept_company_data_json = dept_company.get_data_json()
+        print(json.dumps(dept_company_data_json, ensure_ascii=False, indent=2))
 
         time.sleep(10)
         self.driver.close()

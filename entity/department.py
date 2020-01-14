@@ -9,7 +9,18 @@ class Department(object):
         self.name = name
         self.member_list = []
         self.child_dept = []
-        self.part_dept = None
+        self.father_dept = None
+
+    def get_data_json(self):
+        child_dept = []
+        for each_child_dept in self.child_dept:
+            child_dept.append(each_child_dept.get_data_json())
+        data_json = dict(
+            name=self.name,
+            child_dept=child_dept,
+            member_list=self.member_list
+        )
+        return data_json
 
 
 if __name__ == "__main__":
