@@ -119,7 +119,7 @@ class Sprider(object):
         self.driver.get(DINGDING_URL)
         # 处于未登陆状态则每隔2min刷新一下登陆码
         while not self.login():
-            time.sleep(2 * 60)
+            time.sleep(2 * 15)
         # 登陆成功
         self.driver.save_screenshot("files/page.png")
         # 去掉最开始的框
